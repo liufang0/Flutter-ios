@@ -25,12 +25,14 @@ workflows:
 
       - name: Set up provisioning profiles
         script: |
-          CODE_SIGNING_CERTIFICATE="$HOME/clone/toim.p12"
-          PROVISIONING_PROFILE="$HOME/clone/toim.mobileprovision"
+          CODE_SIGNING_CERTIFICATE="$FCI_BUILD_DIR/../toim.p12"
+          PROVISIONING_PROFILE="$FCI_BUILD_DIR/../toim.mobileprovision"
           PROFILES_HOME="$HOME/Library/MobileDevice/Provisioning Profiles"
           mkdir -p "$PROFILES_HOME"
           cp "$PROVISIONING_PROFILE" "$PROFILES_HOME/"
           echo "Saved provisioning profile to $PROFILES_HOME"
+          echo "Certificate path: $CODE_SIGNING_CERTIFICATE"
+          ls -la "$FCI_BUILD_DIR/../"
 
       - name: Add signing certificate to keychain
         script: |
