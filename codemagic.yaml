@@ -1,6 +1,6 @@
 workflows:
   ios-native:
-    name: iOS Native Build
+    name: iOS Native OpenIM
     max_build_duration: 120
     instance_type: mac_mini_m1
     integrations:
@@ -12,7 +12,6 @@ workflows:
       vars:
         XCODE_WORKSPACE: "Example/OpenIMSDKUIKit.xcworkspace"
         XCODE_SCHEME: "OpenIMSDKUIKit_Example"
-        APP_STORE_APPLE_ID: 1555555551
       cocoapods: default
       xcode: latest
     triggering:
@@ -27,18 +26,11 @@ workflows:
         script: |
           cd Example
           pod install
-      - name: Build iOS app
+      - name: Build iOS native app
         script: |
           xcode-project build-ipa \
-            --workspace "Example/$XCODE_WORKSPACE" \
-            --scheme "$XCODE_SCHEME"
+            --workspace "Example/OpenIMSDKUIKit.xcworkspace" \
+            --scheme "OpenIMSDKUIKit_Example"
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
-    publishing:
-      email:
-        recipients:
-          - your-email@example.com
-        notify:
-          success: true
-          failure: true
