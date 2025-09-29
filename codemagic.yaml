@@ -7,7 +7,7 @@ workflows:
     environment:
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: com.clim1
+        bundle_identifier: io.toim.cn
       cocoapods: default
     scripts:
       - name: Install CocoaPods dependencies
