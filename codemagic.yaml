@@ -8,9 +8,6 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: io.toim.cn
-        additional_bundles:
-          - io.toim.cn.NotificationService
-          - io.toim.3
       cocoapods: default
     scripts:
       - name: Install CocoaPods dependencies
