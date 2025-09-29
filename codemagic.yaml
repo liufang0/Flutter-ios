@@ -1,17 +1,66 @@
 workflows:
-  ios-workflow:
-    name: iOS Build
-    instance_type: mac_mini_m1
+  ios-swiftly:
+    name: ios_toim
     environment:
+      groups:
+        - appstore_credentials
+      vars:
+        XCODE_WORKSPACE: "OpenIMSDKUIKit.xcworkspace" # 名称
+        XCODE_SCHEME: "OpenIMSDKUIKit_Example"       # Scheme
+        FCI_BUILD_DIR: "$HOME/clone/Example/"
       cocoapods: default
+    triggering:
+      events:
+        - push
+        - tag
+        - pull_request
+      branch_patterns:
+        - pattern: 'develop'
+          include: true
+          source: true
     scripts:
-      - name: Install pods
+      - name: Initialize keychain to be used for codesigning
         script: |
-          cd Example
-          pod install
-      - name: Build
+          keychain initialize
+
+      - name: Set up provisioning profiles
         script: |
-          cd Example
-          xcode-project build-ipa --workspace "OpenIMSDKUIKit.xcworkspace" --scheme "OpenIMSDKUIKit_Example"
+          CODE_SIGNING_CERTIFICATE="$HOME/clone/toim.p12"
+          PROVISIONING_PROFILE="$HOME/clone/toim.mobileprovision"
+          PROFILES_HOME="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$PROFILES_HOME"
+          cp "$PROVISIONING_PROFILE" "$PROFILES_HOME/"
+          echo "Saved provisioning profile to $PROFILES_HOME"
+
+      - name: Add signing certificate to keychain
+        script: |
+          keychain add-certificates --certificate "$CODE_SIGNING_CERTIFICATE" --certificate-password "$CERTIFICATE_PASSWORD"
+
+      - name: Increment build number
+        script: |
+          #!/bin/sh
+          set -e
+          set -x
+          cd $FCI_BUILD_DIR
+          agvtool new-version -all $(($(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID") + 1))
+
+      - name: Set up code signing settings on Xcode project
+        script: |
+          xcode-project use-profiles
+
+      - name: Build .ipa
+        script: |
+          xcode-project build-ipa --workspace "$XCODE_WORKSPACE" --scheme "$XCODE_SCHEME"
+
     artifacts:
       - build/ios/ipa/*.ipa
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+
+    publishing:
+      email:
+        recipients:
+          - user1@example.com
+          - user2@example.com
+        notify:
+          success: true
+          failure: true
