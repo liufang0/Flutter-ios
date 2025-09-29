@@ -26,7 +26,7 @@ let sdkWSRoute = "/msg_gateway"
 // TODO: 配置你的服务器地址
 let defaultHost = "38.175.193.207"
 
-let discoverPageURL = "https://www.doubao.com/"
+let discoverPageURL = "https://docs.openim.io/"
 let allowSendMsgNotFriend = "1"
 
 let adminSeverAddrKey = "io.openim.admin.adr"

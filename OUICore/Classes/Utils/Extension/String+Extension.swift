@@ -216,24 +216,6 @@ extension String {
 }
 
 extension String {
-    /// 手机号脱敏显示：前4位+星号+后3位
-    public func maskedPhoneNumber() -> String {
-        guard self.count >= 7 else { return self }
-        
-        let startIndex = self.startIndex
-        let endIndex = self.endIndex
-        
-        // 前4位
-        let prefix = String(self[startIndex..<self.index(startIndex, offsetBy: 4)])
-        // 后3位
-        let suffix = String(self[self.index(endIndex, offsetBy: -3)..<endIndex])
-        // 中间星号数量
-        let middleCount = self.count - 7
-        let stars = String(repeating: "*", count: max(middleCount, 4))
-        
-        return "\(prefix)\(stars)\(suffix)"
-    }
-    
     public func addHyberLink() -> NSAttributedString? {
         let attr = NSMutableAttributedString(string: self)
         attr.addAttributes([.font: UIFont.f17, .foregroundColor: UIColor.c0C1C33], range: NSMakeRange(0, attr.length))

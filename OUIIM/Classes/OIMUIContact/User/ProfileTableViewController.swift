@@ -125,7 +125,7 @@ open class ProfileTableViewController: UITableViewController {
             cell.subtitleLabel.text = FormatUtil.getFormatDate(of: birth)
 
         case .phone:
-            cell.subtitleLabel.text = user?.phoneNumber?.maskedPhoneNumber()
+            cell.subtitleLabel.text = user?.phoneNumber
             cell.accessoryType = .none
 
         case .identifier:

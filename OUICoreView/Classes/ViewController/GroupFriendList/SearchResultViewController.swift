@@ -149,7 +149,7 @@ public class SearchResultViewController: UIViewController, UISearchResultsUpdati
                         self.dataList = res.map { elem in
                             if isNumber {
                                 if isPhone {
-                                    return [elem.userID : "手机号".innerLocalized() + ":" + (elem.phoneNumber?.maskedPhoneNumber() ?? "")]
+                                    return [elem.userID : "手机号".innerLocalized() + ":" + elem.phoneNumber!]
                                 } else {
                                     return [elem.userID : "ID:" + elem.userID]
                                 }
