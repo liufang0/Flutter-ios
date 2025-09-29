@@ -1,66 +1,44 @@
 workflows:
-  ios-swiftly:
-    name: ios_toim
+  ios-native:
+    name: iOS Native Build
+    max_build_duration: 120
+    instance_type: mac_mini_m1
+    integrations:
+      app_store_connect: codemagic
     environment:
-      groups:
-        - appstore_credentials
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.openim.toim
       vars:
-        XCODE_WORKSPACE: "OpenIMSDKUIKit.xcworkspace" # 名称
-        XCODE_SCHEME: "OpenIMSDKUIKit_Example"       # Scheme
-        FCI_BUILD_DIR: "$HOME/clone/Example/"
+        XCODE_WORKSPACE: "Example/OpenIMSDKUIKit.xcworkspace"
+        XCODE_SCHEME: "OpenIMSDKUIKit_Example"
+        APP_STORE_APPLE_ID: 1555555551
       cocoapods: default
+      xcode: latest
     triggering:
       events:
         - push
-        - tag
-        - pull_request
       branch_patterns:
-        - pattern: 'develop'
+        - pattern: 'main'
           include: true
           source: true
     scripts:
-      - name: Initialize keychain to be used for codesigning
+      - name: Install CocoaPods dependencies
         script: |
-          keychain initialize
-
-      - name: Set up provisioning profiles
+          cd Example
+          pod install
+      - name: Build iOS app
         script: |
-          CODE_SIGNING_CERTIFICATE="$HOME/clone/toim.p12"
-          PROVISIONING_PROFILE="$HOME/clone/toim.mobileprovision"
-          PROFILES_HOME="$HOME/Library/MobileDevice/Provisioning Profiles"
-          mkdir -p "$PROFILES_HOME"
-          cp "$PROVISIONING_PROFILE" "$PROFILES_HOME/"
-          echo "Saved provisioning profile to $PROFILES_HOME"
-
-      - name: Add signing certificate to keychain
-        script: |
-          keychain add-certificates --certificate "$CODE_SIGNING_CERTIFICATE" --certificate-password "$CERTIFICATE_PASSWORD"
-
-      - name: Increment build number
-        script: |
-          #!/bin/sh
-          set -e
-          set -x
-          cd $FCI_BUILD_DIR
-          agvtool new-version -all $(($(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID") + 1))
-
-      - name: Set up code signing settings on Xcode project
-        script: |
-          xcode-project use-profiles
-
-      - name: Build .ipa
-        script: |
-          xcode-project build-ipa --workspace "$XCODE_WORKSPACE" --scheme "$XCODE_SCHEME"
-
+          xcode-project build-ipa \
+            --workspace "Example/$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
     artifacts:
       - build/ios/ipa/*.ipa
-      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
-
+      - /tmp/xcodebuild_logs/*.log
     publishing:
       email:
         recipients:
-          - user1@example.com
-          - user2@example.com
+          - your-email@example.com
         notify:
           success: true
           failure: true
