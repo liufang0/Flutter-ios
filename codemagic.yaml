@@ -2,11 +2,9 @@ workflows:
   ios-swiftly:
     name: ios_toim
     environment:
-      groups:
-        - appstore_credentials
       vars:
-        XCODE_WORKSPACE: "OpenIMSDKUIKit.xcworkspace" # 名称
-        XCODE_SCHEME: "OpenIMSDKUIKit_Example"       # Scheme
+        XCODE_WORKSPACE: "OpenIMSDKUIKit.xcworkspace"
+        XCODE_SCHEME: "OpenIMSDKUIKit_Example"
         FCI_BUILD_DIR: "$HOME/clone/Example/"
       cocoapods: default
     triggering:
@@ -15,54 +13,34 @@ workflows:
         - tag
         - pull_request
       branch_patterns:
-        - pattern: 'develop'
+        - pattern: 'master'
           include: true
           source: true
     scripts:
-      - name: Initialize keychain to be used for codesigning
+      - name: Install CocoaPods dependencies
         script: |
-          keychain initialize
-
-      - name: Set up provisioning profiles
-        script: |
-          CODE_SIGNING_CERTIFICATE="$FCI_BUILD_DIR/../toim.p12"
-          PROVISIONING_PROFILE="$FCI_BUILD_DIR/../toim.mobileprovision"
-          PROFILES_HOME="$HOME/Library/MobileDevice/Provisioning Profiles"
-          mkdir -p "$PROFILES_HOME"
-          cp "$PROVISIONING_PROFILE" "$PROFILES_HOME/"
-          echo "Saved provisioning profile to $PROFILES_HOME"
-          echo "Certificate path: $CODE_SIGNING_CERTIFICATE"
-          ls -la "$FCI_BUILD_DIR/../"
-
-      - name: Add signing certificate to keychain
-        script: |
-          keychain add-certificates --certificate "$CODE_SIGNING_CERTIFICATE" --certificate-password "$CERTIFICATE_PASSWORD"
-
-      - name: Increment build number
-        script: |
-          #!/bin/sh
-          set -e
-          set -x
           cd $FCI_BUILD_DIR
-          agvtool new-version -all $(($(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID") + 1))
+          pod install
 
-      - name: Set up code signing settings on Xcode project
+      - name: Build iOS project (unsigned)
         script: |
-          xcode-project use-profiles
-
-      - name: Build .ipa
-        script: |
-          xcode-project build-ipa --workspace "$XCODE_WORKSPACE" --scheme "$XCODE_SCHEME"
+          cd $FCI_BUILD_DIR
+          xcodebuild -workspace "$XCODE_WORKSPACE" \
+                     -scheme "$XCODE_SCHEME" \
+                     -configuration Debug \
+                     -destination 'generic/platform=iOS Simulator' \
+                     CODE_SIGN_IDENTITY="" \
+                     CODE_SIGNING_REQUIRED=NO \
+                     clean build
 
     artifacts:
-      - build/ios/ipa/*.ipa
-      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
+      - /tmp/xcodebuild_logs/*.log
 
     publishing:
       email:
         recipients:
           - user1@example.com
-          - user2@example.com
         notify:
           success: true
           failure: true
