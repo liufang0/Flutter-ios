@@ -1,23 +1,17 @@
-# System Requirements:
-# - macOS 15 or later
-# - Xcode 16.1
-# - Git for version control
-
 workflows:
   ios-workflow:
-    name: iOS Workflow
+    name: iOS Build
     instance_type: mac_mini_m1
     environment:
-      ios_signing:
-        distribution_type: development
-        bundle_identifier: io.toim.cn
       cocoapods: default
     scripts:
-      - name: Install CocoaPods dependencies
+      - name: Install pods
         script: |
+          cd Example
           pod install
-      - name: Build ipa for distribution
+      - name: Build
         script: |
-          xcode-project build-ipa
+          cd Example
+          xcode-project build-ipa --workspace "OpenIMSDKUIKit.xcworkspace" --scheme "OpenIMSDKUIKit_Example"
     artifacts:
       - build/ios/ipa/*.ipa
