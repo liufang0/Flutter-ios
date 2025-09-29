@@ -1,3 +1,8 @@
+# System Requirements:
+# - macOS 15 or later
+# - Xcode 16.1
+# - Git for version control
+
 workflows:
   ios-workflow:
     name: iOS Workflow
