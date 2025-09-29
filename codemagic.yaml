@@ -1,36 +1,20 @@
 workflows:
-  ios-native:
-    name: iOS Native OpenIM
-    max_build_duration: 120
+  ios-workflow:
+    name: iOS Workflow
     instance_type: mac_mini_m1
     integrations:
       app_store_connect: codemagic
     environment:
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: com.openim.toim
-      vars:
-        XCODE_WORKSPACE: "Example/OpenIMSDKUIKit.xcworkspace"
-        XCODE_SCHEME: "OpenIMSDKUIKit_Example"
+        bundle_identifier: com.example.app
       cocoapods: default
-      xcode: latest
-    triggering:
-      events:
-        - push
-      branch_patterns:
-        - pattern: 'main'
-          include: true
-          source: true
     scripts:
       - name: Install CocoaPods dependencies
         script: |
-          cd Example
           pod install
-      - name: Build iOS native app
+      - name: Build ipa for distribution
         script: |
-          xcode-project build-ipa \
-            --workspace "Example/OpenIMSDKUIKit.xcworkspace" \
-            --scheme "OpenIMSDKUIKit_Example"
+          xcode-project build-ipa
     artifacts:
       - build/ios/ipa/*.ipa
-      - /tmp/xcodebuild_logs/*.log
